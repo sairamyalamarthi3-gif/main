@@ -8,7 +8,7 @@ allowed_drop = 0.05
 # Simulated production data (streaming-like)
 # 1 = pass, 0 = fail
 
-y_true_prod = np.array([1,0,1,0,0,0,0,1,0,1])
+y_true_prod = np.array([1,1,1,0,1,1,0,1,0,1])
 y_pred_prod = np.array([1,1,0,0,1,0,0,1,0,1])
 
 window_size = 5
