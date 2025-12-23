@@ -14,10 +14,11 @@ prod_accuracy= accuracy_score(y_true_prod,y_pred_prod)
 st.metric("Baseline Accuracy",baseline_accuracy)
 st.metric("Production Accuracy",prod_accuracy)
 
-threshold = 0.05
+threshold = 0.02
 
 if prod_accuracy < baseline_accuracy - threshold:
     st.error("Model accuracy dropped in production")
 else:
     st.success("Model accuracy is stable")
+
 
