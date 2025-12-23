@@ -1,5 +1,4 @@
 import streamlit as st
-import sklearn
 from sklearn.metrics import accuracy_score
 import numpy as np
 
@@ -21,3 +20,4 @@ if prod_accuracy < baseline_accuracy - threshold:
     st.error("Model accuracy dropped in production")
 else:
     st.success("Model accuracy is stable")
+
