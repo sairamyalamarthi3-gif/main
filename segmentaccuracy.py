@@ -5,7 +5,7 @@ from sklearn.metrics import accuracy_score
 st.title("Segement Wise Accuracy monitoring")
 
 baseline_accuracy = 0.90
-accuracy_drop = 0.05
+allowed_drop = 0.05
 
 y_true = np.array([0,1,1,0,1,1,1,0,0,1,0,1,1])
 y_pred = np.array([1,0,1,0,1,0,1,1,0,0,1,0,0])
