@@ -7,7 +7,7 @@ st.title("Model Accuracy Monitoring")
 baseline_accuracy = 0.90
 ##Simulated production data
 y_true_prod = [1,0,1,1,0,1,0,1]
-y_pred_prod = [1,0,0,1,0,1,0,0]
+y_pred_prod = [1,0,1,1,0,1,0,0]
 ## Calculate production accuracy
 prod_accuracy= accuracy_score(y_true_prod,y_pred_prod)
 
@@ -20,5 +20,6 @@ if prod_accuracy < baseline_accuracy - threshold:
     st.error("Model accuracy dropped in production")
 else:
     st.success("Model accuracy is stable")
+
 
 
