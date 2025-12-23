@@ -11,7 +11,7 @@ y_true = np.array([0,1,1,0,1,1,1,0,0,1,0,1,1])
 y_pred = np.array([1,0,1,0,1,0,1,1,0,0,1,0,0])
 
 # Segment info (0 = weekday, 1 = weekend)
-day_type = np.array([0,0,0,0,1,1,1,1])
+day_type = np.array([0,0,0,0,1,1,1,1,0,0,1,1,0])
 
 # Split by segment
 weekday_idx = day_type == 0
