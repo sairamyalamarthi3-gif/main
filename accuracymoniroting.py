@@ -21,5 +21,7 @@ if prod_accuracy < baseline_accuracy - threshold:
 else:
     st.success("Model accuracy is stable")
 
+accuracy_history = [0.92, 0.91, 0.90, prod_accuracy]  # append production accuracy
+st.line_chart(accuracy_history)
 
 
