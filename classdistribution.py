@@ -12,8 +12,8 @@ fail_count = np.sum (y_pred == 0)
 
 ##Show metrics
 
-st.metrics("Pass Prediction",pass_count)
-st.metrics("Fail Prediction",fail_count)
+st.metric("Pass Prediction",pass_count)
+st.metric("Fail Prediction",fail_count)
 
 ##Logic
 total = pass_count + fail_count
