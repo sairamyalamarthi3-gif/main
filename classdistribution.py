@@ -18,7 +18,7 @@ st.metric("Fail Prediction",fail_count)
 ##Logic
 total = pass_count + fail_count
 pass_ratio = total/pass_count
-
+st.write(f"Pass ratio is",pass_ratio)
 if pass_ratio > 0.9 or pass_ratio < 0.1:
   st.error("Abnormal Distribution Detected")
 else:
