@@ -23,4 +23,11 @@ if pass_ratio > 0.9 or pass_ratio < 0.1:
   st.error("Abnormal Distribution Detected")
 else:
   st.success("Class distribution looks healthy")
+df = pd.DataFrame({
+    "Class": ["Pass", "Fail"],
+    "Count": [pass_count, fail_count]
+}).set_index("Class")
+# Bar chart (Streamlit native)
+st.subheader("Prediction Distribution")
+st.bar_chart(df)
   
