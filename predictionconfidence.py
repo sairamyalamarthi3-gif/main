@@ -12,7 +12,7 @@ avg_confidence = prod_confidence.mean()
 st.metric("Baseline Confidence",baseline_confidence)
 st.metric("Production Avg Confidence",round(avg_confidence,2))
 ##Alert Logic
-if avg_confidence < baseline_confidence - allowed drop:
+if avg_confidence < baseline_confidence - allowed_drop:
     st.error("Model confidence dropped in Production")
 else 
     st.success("Model confidence is Stable")
