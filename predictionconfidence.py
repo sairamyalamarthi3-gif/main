@@ -18,4 +18,5 @@ else:
     st.success("Model confidence is Stable")
 # Optional visualization
 st.line_chart(prod_confidence)
+st.pie_char(prod_confidence)
   
