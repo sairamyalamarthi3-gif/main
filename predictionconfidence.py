@@ -5,7 +5,7 @@ st.title("Prediction Confidence Monitoring")
 baseline_confidence = 0.85
 allowed_drop = 0.10
 ##Simulated production prediction confidence
-prod_confidence = np.array([0.82,0.80,0.78,0.75,0.73,0.70])
+prod_confidence = np.array([0.82,0.90,0.78,0.75,0.93,0.70])
 ##average confidence
 avg_confidence = prod_confidence.mean()
 ##Display metrics
