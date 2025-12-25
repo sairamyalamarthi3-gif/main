@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title("🔐 Login Page Example")
+st.title("🔐 Login Page")
 
 # Initialize login state in session_state
 if "logged_in" not in st.session_state:
