@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 st.title("Feature Range Validation")
 feature_range = {
-  "hpurs_studied":(0,10),
+  "hours_studied":(0,10),
   "attendance":(0.0,1.0)
 }
 ##production data
