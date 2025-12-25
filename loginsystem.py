@@ -6,9 +6,9 @@ users = pd.read_csv("Book(Sheet1).csv")
 ## Initialize session state
 if "logged_in" not in st.session_state:
   st.session_state_logged_in = False
-if "username" not in st_session_state:
+if "username" not in st.session_state:
   st.session_state_username =""
-if "role" not in st_session_state:
+if "role" not in st.session_state:
   st.session_state_role = ""
 
 ## Login Form
