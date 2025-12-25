@@ -21,7 +21,7 @@ for feature,(min_val,max_val) in feature_range.items():
   (df[feature] < min_val) | (df[feature] > max_val)
   ]
   if not(out_of_range).empty:
-    st.error(f"{Feature} has values outside the range {min_val}-{max_val}")
+    st.error(f"{feature} has values outside the range {min_val}-{max_val}")
     st.write(out_of_range[[feature]])
   else:
     st.success(f"✅ {feature} values are within range")
