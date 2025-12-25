@@ -27,7 +27,7 @@ feature_range = {
   "Hours_studied" : [0,10],
   "Attendance" : [0.0,1.0]
 }
-for feature,(min_val,mex_val) in feature_range.items():
+for feature,(min_val,max_val) in feature_range.items():
   out_of_range = df[
   (df[feature] < min_val) | (df[feature] > max_val)
   ]
