@@ -3,7 +3,6 @@ import pandas as pd
 from datetime import datetime
 st.title("Real time Login System")
 users = pd.read_csv("Book(Sheet1).csv")
-
 ## Initialize session state
 if "logged_in" not in st.session_state:
   st.session_state_logged_in = False
