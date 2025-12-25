@@ -28,7 +28,7 @@ if not user.empty:
         st.session_state.username = username
         st.session_state.role = user.iloc[0]["role"]
         st.success("Login successful!")
-    else:
+else:
         st.error("Invalid credentials")
 if st.session_state.logged_in:
     st.header("Dashboard")
