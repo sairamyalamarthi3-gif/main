@@ -1,4 +1,4 @@
-import streamlit 
+import streamlit as st
 st.title("Login Page")
 username = st.text_input("User Name")
 password = st.text_input("Password",type =  "password")
