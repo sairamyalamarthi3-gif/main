@@ -1,37 +1,33 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
-st.title("Real time Login System")
-users = pd.read_csv("Book(Sheet1).csv")
-## Initialize session state
+
+st.title("🔐 Real Login System (Basic)")
+
+# Load users (real source)
+users_df = pd.read_csv("users.csv")
+
+# Initialize session state
 if "logged_in" not in st.session_state:
-  st.session_state_logged_in = False
+    st.session_state.logged_in = False
 if "username" not in st.session_state:
-  st.session_state_username =""
+    st.session_state.username = ""
 if "role" not in st.session_state:
-  st.session_state_role = ""
+    st.session_state.role = ""
 
-## Login Form
-
-Username = st.text_input("Username")
-Password = st.text_input("Password", type = "password")
+# Login form
+username = st.text_input("Username")
+password = st.text_input("Password", type="password")
 
 if st.button("Login"):
-  user = users[
-         (users["username"] == username) &
-         (users["password"] == password)
-  ]
+    user = users_df[
+        (users_df["username"] == username) &
+        (users_df["password"] == password)
+    ]
 
-if not user.empty:
+    if not user.empty:
         st.session_state.logged_in = True
         st.session_state.username = username
         st.session_state.role = user.iloc[0]["role"]
         st.success("Login successful!")
-else:
+    else:
         st.error("Invalid credentials")
-if st.session_state.logged_in:
-    st.header("Dashboard")
-    st.write(f"Welcome, {st.session_state.username}")
-    st.write(f"Role: {st.session_state.role}")
-
-  
