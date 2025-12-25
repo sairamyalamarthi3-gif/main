@@ -16,4 +16,4 @@ st.metric(
   value = st.session_state.page_visits
 )
 
-st.write("Current Visit Count": st.session_state.page_visits)
+st.write("Current Visit Count:" st.session_state.page_visits)
