@@ -16,7 +16,7 @@ st.subheader("Production Data")
 st.write(df)
 st.subheader("Range Validation Results")
 ##Validate feature ranges
-for feature,(min_val,mex_val) in feature_range.items():
+for feature,(min_val,max_val) in feature_range.items():
   out_of_range = df[
   (df[feature] < min_val) | (df[feature] > max_val)
   ]
