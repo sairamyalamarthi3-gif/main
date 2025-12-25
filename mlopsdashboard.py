@@ -16,7 +16,7 @@ st.write(df)
 st.subheader("Missing Value Monitoring")
 missing_counts = df.isnull().sum()
 st.write(missing_counts)
-if missing_counts.sum() > 0:
+if missing_counts.sum > 0:
   st.error("Missing Values Detected")
 else:
   st.success(" No missing Values Detected")
