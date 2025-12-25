@@ -1,19 +1,24 @@
 import streamlit as st
 import pandas as pd
-st.title("Real Time Page Monitoring System")
+from datetime import datetime
 
-## Initialize Session State
-if "page_visits" not in st.session_state:
-  st.session_state.page_visits = 0
+st.title("⏱️ Timestamped Page Visits")
 
-##Simulate a page visit
+# Initialize session state
+if "visits" not in st.session_state:
+    st.session_state.visits = []
+
+# Simulate a page visit
 if st.button("Simulate Page Visit"):
-  st.session_state.page_visits += 1 
+    visit_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    st.session_state.visits.append(visit_time)
 
-## Display Real time metric
-st.metric(
-  label = "Total Page Visits",
-  value = st.session_state.page_visits
+# Convert to DataFrame for display
+visits_df = pd.DataFrame(
+    st.session_state.visits,
+    columns=["Visit Time"]
 )
 
-st.write("Current visit count:", st.session_state.page_visits)
+# Show results
+st.subheader("Visit History")
+st.dataframe(visits_df)
