@@ -53,7 +53,7 @@ st.bar_chart(dist_df)
 st.subheader("📉 Prediction Confidence Monitoring")
 
 baseline_confidence = 0.80
-avg_confidence = df["confidence"].mean()
+avg_confidence = df["Confidence"].mean()
 
 st.metric("Baseline Confidence", baseline_confidence)
 st.metric("Production Avg Confidence", round(avg_confidence, 2))
