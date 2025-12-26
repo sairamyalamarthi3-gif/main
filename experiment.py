@@ -58,11 +58,16 @@ if st.session_state.experiments:
     if all(summary["Visitors"] >= min_users):
         rate_a = summary.loc["A", "Conversion Rate (%)"]
         rate_b = summary.loc["B", "Conversion Rate (%)"]
+        rate_c = summary.loc["C", "Conversion Rate (%)"]
+        rate_e = summary.loc["E", "Conversion Rate (%)"]
+        
 
         if rate_a > rate_b:
             st.success("✅ Variant A is the winner")
-        elif rate_b > rate_a:
+        elif rate_b > rate_c:
             st.success("✅ Variant B is the winner")
+        elif rate_c > rate_e:
+            st.success("✅ Variant C is the winner")
         else:
             st.info("⚖️ Both variants perform equally")
     else:
