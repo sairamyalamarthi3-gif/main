@@ -64,10 +64,10 @@ if st.session_state.logged_in:
 
         # Stock Calculation
        if "Change" in df.columns:
-        stock = df.groupby("Item")["Change"].sum()
-        st.bar_chart(stock)
+         stock = df.groupby("Item")["Change"].sum()
+         st.bar_chart(stock)
        else:
-        st.error("Change column missing. Inventory data is invalid.")
+         st.error("Change column missing. Inventory data is invalid.")
 
 
     # Logout
