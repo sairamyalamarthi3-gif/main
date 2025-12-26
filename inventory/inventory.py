@@ -2,16 +2,9 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-st.set_page_config(page_title="Inventory System", layout="centered")
-st.title("📦 Login-Based Inventory System")
+st.title("📦 Inventory System (Simple & Stable)")
 
-# ---------------- DEMO USERS ----------------
-USERS = {
-    "admin": "admin123",
-    "staff": "staff123"
-}
-
-# ---------------- SESSION STATE ----------------
+# ---------- SESSION STATE ----------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -21,7 +14,13 @@ if "username" not in st.session_state:
 if "inventory" not in st.session_state:
     st.session_state.inventory = []
 
-# ---------------- LOGIN ----------------
+# ---------- USERS ----------
+USERS = {
+    "admin": "admin123",
+    "staff": "staff123"
+}
+
+# ---------- LOGIN PAGE ----------
 if not st.session_state.logged_in:
     st.subheader("🔐 Login")
 
@@ -33,49 +32,45 @@ if not st.session_state.logged_in:
             st.session_state.logged_in = True
             st.session_state.username = username
             st.success("Login successful")
-            st.rerun()
         else:
-            st.error("Invalid username or password")
+            st.error("Invalid credentials")
 
-# ---------------- INVENTORY DASHBOARD ----------------
-if st.session_state.logged_in:
+# ---------- DASHBOARD ----------
+else:
     st.subheader("📊 Inventory Dashboard")
-    st.write(f"Logged in as: **{st.session_state.username}**")
+    st.write(f"Logged in as **{st.session_state.username}**")
 
-    # Inventory input
-    item = st.text_input("Item Name")
-    quantity = st.number_input("Quantity", min_value=1, step=1)
-    action = st.selectbox("Action", ["IN (Restock)", "OUT (Sale)"])
+    # Inventory form
+    item = st.text_input("Item name")
+    qty = st.number_input("Quantity", min_value=1, step=1)
+    action = st.selectbox("Action", ["IN", "OUT"])
 
-    if st.button("Update Inventory"):
-        if item:
-            record = {
-                "Item": item,
-                "Change": quantity if action == "IN (Restock)" else -quantity,
-                "Action": action,
-                "Updated By": st.session_state.username,
-                "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-            st.session_state.inventory.append(record)
-            st.success("Inventory updated")
-        else:
-            st.error("Item name is required")
+    if st.button("Add Entry"):
+        change = qty if action == "IN" else -qty
 
-    # Show inventory data
+        st.session_state.inventory.append({
+            "Item": item,
+            "Change": change,
+            "Action": action,
+            "User": st.session_state.username,
+            "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        })
+
+        st.success("Inventory updated")
+
+    # Show data
     if st.session_state.inventory:
         df = pd.DataFrame(st.session_state.inventory)
 
         st.subheader("📋 Inventory Log")
-        st.dataframe(df, use_container_width=True)
+        st.dataframe(df)
 
-        # Stock calculation (FIXED)
+        st.subheader("📦 Current Stock")
         stock = df.groupby("Item")["Change"].sum()
-
-        st.subheader("📦 Current Stock Levels")
         st.bar_chart(stock)
 
     # Logout
     if st.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.username = ""
-        st.rerun()
+        st.session_state.inventory = []
