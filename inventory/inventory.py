@@ -37,4 +37,45 @@ if not st.session_state.logged_in:
         else:
             st.error("Invalid username or password")
 
-# ---------------- INV
+# ---------------- INVENTORY DASHBOARD ----------------
+if st.session_state.logged_in:
+    st.subheader("📊 Inventory Dashboard")
+    st.write(f"Logged in as: **{st.session_state.username}**")
+
+    # Inventory input
+    item = st.text_input("Item Name")
+    quantity = st.number_input("Quantity", min_value=1, step=1)
+    action = st.selectbox("Action", ["IN (Restock)", "OUT (Sale)"])
+
+    if st.button("Update Inventory"):
+        if item:
+            record = {
+                "Item": item,
+                "Change": quantity if action == "IN (Restock)" else -quantity,
+                "Action": action,
+                "Updated By": st.session_state.username,
+                "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            st.session_state.inventory.append(record)
+            st.success("Inventory updated")
+        else:
+            st.error("Item name is required")
+
+    # Show inventory data
+    if st.session_state.inventory:
+        df = pd.DataFrame(st.session_state.inventory)
+
+        st.subheader("📋 Inventory Log")
+        st.dataframe(df, use_container_width=True)
+
+        # Stock calculation (FIXED)
+        stock = df.groupby("Item")["Change"].sum()
+
+        st.subheader("📦 Current Stock Levels")
+        st.bar_chart(stock)
+
+    # Logout
+    if st.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.username = ""
+        st.rerun()
