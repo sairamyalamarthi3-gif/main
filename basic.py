@@ -27,3 +27,4 @@ st.divider()
 ##Select box
 select= st.selectbox("Choose a column", options = df.columns[1:].index = 1, vertical = True)
 st.write(select)
+st.divider()
