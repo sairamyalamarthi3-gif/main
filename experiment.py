@@ -12,7 +12,7 @@ if "experiments" not in st.session_state:
 with st.form("ab_event_form"):
     st.subheader("📥 Log User Event")
 
-    variant = st.selectbox("Variant", ["A", "B"])
+    variant = st.selectbox("Variant", ["A", "B","C","E"])
     converted = st.selectbox("Conversion", ["Yes", "No"])
 
     submit = st.form_submit_button("Log Event")
