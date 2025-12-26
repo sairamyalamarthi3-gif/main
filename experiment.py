@@ -13,7 +13,7 @@ with st.form("ab_event_form"):
     st.subheader("📥 Log User Event")
 
     variant = st.selectbox("Variant", ["A", "B","C","E"])
-    converted = st.selectbox("Conversion", ["Yes", "No"])
+    converted = st.selectbox("Conversion", ["Yes", "No","NA"])
 
     submit = st.form_submit_button("Log Event")
 
