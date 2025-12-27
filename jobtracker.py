@@ -2,78 +2,117 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-st.title("🛠 Batch Job Health Tracker")
+st.title("🛠 Advanced Batch Job Health Tracker")
 
-# -------- SESSION STATE --------
-if "job_health_logs" not in st.session_state:
-    st.session_state.job_health_logs = []
+# ---------- SESSION STATE ----------
+if "job_logs" not in st.session_state:
+    st.session_state.job_logs = []
 
-# -------- JOB UPDATE FORM --------
+# ---------- JOB UPDATE FORM ----------
 with st.form("job_form"):
-    st.subheader("Update Job Health")
+    st.subheader("Update Job Run")
 
     job_name = st.text_input("Job Name")
-
     status = st.selectbox(
         "Job Status",
         ["⏳ Running", "✅ Success", "❌ Failed"]
     )
-
-    health = st.selectbox(
-        "Job Health",
-        ["🟢 Healthy", "🟡 Degraded", "🔴 Unhealthy"]
+    duration = st.number_input(
+        "Duration (seconds)", min_value=0, step=10
+    )
+    failure_reason = st.text_input(
+        "Failure Reason (if failed)"
     )
 
-    submit = st.form_submit_button("Save Update")
+    submit = st.form_submit_button("Save Job Run")
 
 if submit and job_name:
-    st.session_state.job_health_logs.append({
+    st.session_state.job_logs.append({
         "Job Name": job_name,
         "Status": status,
-        "Health": health,
+        "Duration (sec)": duration,
+        "Failure Reason": failure_reason if status == "❌ Failed" else "",
         "Timestamp": datetime.now()
     })
-    st.success("Job health record saved")
+    st.success("Job run recorded")
 
-# -------- DASHBOARD --------
-if st.session_state.job_health_logs:
-    df = pd.DataFrame(st.session_state.job_health_logs)
+# ---------- DASHBOARD ----------
+if st.session_state.job_logs:
+    df = pd.DataFrame(st.session_state.job_logs)
 
-    # -------- LATEST HEALTH PER JOB --------
-    latest_df = (
-        df.sort_values("Timestamp")
-          .groupby("Job Name", as_index=False)
-          .last()
+    # ---------- AUTO HEALTH LOGIC ----------
+    df = df.sort_values("Timestamp")
+
+    def compute_health(job_df):
+        last_two = job_df.tail(2)
+        if (last_two["Status"] == "❌ Failed").sum() >= 2:
+            return "🔴 Unhealthy"
+        elif job_df.iloc[-1]["Status"] == "❌ Failed":
+            return "🟡 Degraded"
+        else:
+            return "🟢 Healthy"
+
+    health_map = (
+        df.groupby("Job Name")
+          .apply(compute_health)
+          .reset_index(name="Health")
     )
 
-    latest_df["Timestamp"] = latest_df["Timestamp"].dt.strftime(
+    # ---------- LATEST STATUS ----------
+    latest = (
+        df.groupby("Job Name", as_index=False)
+          .last()
+          .merge(health_map, on="Job Name")
+    )
+
+    latest["Timestamp"] = latest["Timestamp"].dt.strftime(
         "%Y-%m-%d %H:%M:%S"
     )
 
+    # ---------- FILTER ----------
+    st.subheader("🔍 Filter Jobs")
+    selected_job = st.selectbox(
+        "Select Job",
+        ["All"] + latest["Job Name"].tolist()
+    )
+
+    if selected_job != "All":
+        latest = latest[latest["Job Name"] == selected_job]
+
+    # ---------- DISPLAY ----------
     st.subheader("📋 Latest Job Health")
-    st.dataframe(latest_df, use_container_width=True)
+    st.dataframe(latest, use_container_width=True)
 
-    # -------- METRICS --------
+    # ---------- METRICS ----------
     col1, col2, col3 = st.columns(3)
-    col1.metric("🟢 Healthy Jobs", (latest_df["Health"] == "🟢 Healthy").sum())
-    col2.metric("🟡 Degraded Jobs", (latest_df["Health"] == "🟡 Degraded").sum())
-    col3.metric("🔴 Unhealthy Jobs", (latest_df["Health"] == "🔴 Unhealthy").sum())
+    col1.metric("🟢 Healthy", (latest["Health"] == "🟢 Healthy").sum())
+    col2.metric("🟡 Degraded", (latest["Health"] == "🟡 Degraded").sum())
+    col3.metric("🔴 Unhealthy", (latest["Health"] == "🔴 Unhealthy").sum())
 
-    # -------- ALERTS --------
-    if (latest_df["Health"] == "🔴 Unhealthy").any():
-        st.error("🚨 One or more jobs are unhealthy")
-    elif (latest_df["Health"] == "🟡 Degraded").any():
-        st.warning("⚠️ Some jobs are degraded")
+    # ---------- ALERTS ----------
+    if (latest["Health"] == "🔴 Unhealthy").any():
+        st.error("🚨 Jobs failing repeatedly!")
+    elif (latest["Health"] == "🟡 Degraded").any():
+        st.warning("⚠️ Some jobs failed recently")
     else:
         st.success("✅ All jobs healthy")
 
-    # -------- FULL HISTORY --------
-    with st.expander("📜 View Full Job Health History"):
-        history_df = df.copy()
-        history_df["Timestamp"] = history_df["Timestamp"].dt.strftime(
+    # ---------- HISTORY ----------
+    with st.expander("📜 Full Job Run History"):
+        hist = df.copy()
+        hist["Timestamp"] = hist["Timestamp"].dt.strftime(
             "%Y-%m-%d %H:%M:%S"
         )
-        st.dataframe(history_df, use_container_width=True)
+        st.dataframe(hist, use_container_width=True)
+
+        # ---------- CSV EXPORT ----------
+        csv = hist.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "⬇️ Download History as CSV",
+            csv,
+            "job_history.csv",
+            "text/csv"
+        )
 
 else:
-    st.info("No job health records yet")
+    st.info("No job runs recorded yet")
