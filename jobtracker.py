@@ -2,11 +2,20 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-st.title("🛠 Advanced Batch Job Health Tracker")
+st.title("🛠 Batch Job Health Tracker with Runtime SLA")
 
 # ---------- SESSION STATE ----------
 if "job_logs" not in st.session_state:
     st.session_state.job_logs = []
+
+# ---------- SLA CONFIG ----------
+st.sidebar.header("⚙️ SLA Settings")
+SLA_SECONDS = st.sidebar.number_input(
+    "Max allowed job runtime (seconds)",
+    min_value=10,
+    value=300,
+    step=50
+)
 
 # ---------- JOB UPDATE FORM ----------
 with st.form("job_form"):
@@ -20,9 +29,7 @@ with st.form("job_form"):
     duration = st.number_input(
         "Duration (seconds)", min_value=0, step=10
     )
-    failure_reason = st.text_input(
-        "Failure Reason (if failed)"
-    )
+    failure_reason = st.text_input("Failure Reason (if failed)")
 
     submit = st.form_submit_button("Save Job Run")
 
@@ -39,18 +46,29 @@ if submit and job_name:
 # ---------- DASHBOARD ----------
 if st.session_state.job_logs:
     df = pd.DataFrame(st.session_state.job_logs)
-
-    # ---------- AUTO HEALTH LOGIC ----------
     df = df.sort_values("Timestamp")
 
+    # ---------- HEALTH CALCULATION ----------
     def compute_health(job_df):
+        last_run = job_df.iloc[-1]
         last_two = job_df.tail(2)
+
+        # Rule 1: consecutive failures
         if (last_two["Status"] == "❌ Failed").sum() >= 2:
             return "🔴 Unhealthy"
-        elif job_df.iloc[-1]["Status"] == "❌ Failed":
+
+        # Rule 2: last run failed
+        if last_run["Status"] == "❌ Failed":
             return "🟡 Degraded"
-        else:
-            return "🟢 Healthy"
+
+        # Rule 3: slow job
+        if (
+            last_run["Status"] == "✅ Success"
+            and last_run["Duration (sec)"] > SLA_SECONDS
+        ):
+            return "🟡 Degraded"
+
+        return "🟢 Healthy"
 
     health_map = (
         df.groupby("Job Name")
@@ -69,16 +87,6 @@ if st.session_state.job_logs:
         "%Y-%m-%d %H:%M:%S"
     )
 
-    # ---------- FILTER ----------
-    st.subheader("🔍 Filter Jobs")
-    selected_job = st.selectbox(
-        "Select Job",
-        ["All"] + latest["Job Name"].tolist()
-    )
-
-    if selected_job != "All":
-        latest = latest[latest["Job Name"] == selected_job]
-
     # ---------- DISPLAY ----------
     st.subheader("📋 Latest Job Health")
     st.dataframe(latest, use_container_width=True)
@@ -91,11 +99,11 @@ if st.session_state.job_logs:
 
     # ---------- ALERTS ----------
     if (latest["Health"] == "🔴 Unhealthy").any():
-        st.error("🚨 Jobs failing repeatedly!")
+        st.error("🚨 Jobs failing repeatedly")
     elif (latest["Health"] == "🟡 Degraded").any():
-        st.warning("⚠️ Some jobs failed recently")
+        st.warning("⚠️ Slow or recently failed jobs detected")
     else:
-        st.success("✅ All jobs healthy")
+        st.success("✅ All jobs within SLA")
 
     # ---------- HISTORY ----------
     with st.expander("📜 Full Job Run History"):
@@ -104,15 +112,6 @@ if st.session_state.job_logs:
             "%Y-%m-%d %H:%M:%S"
         )
         st.dataframe(hist, use_container_width=True)
-
-        # ---------- CSV EXPORT ----------
-        csv = hist.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            "⬇️ Download History as CSV",
-            csv,
-            "job_history.csv",
-            "text/csv"
-        )
 
 else:
     st.info("No job runs recorded yet")
