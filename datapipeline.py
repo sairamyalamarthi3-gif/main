@@ -9,8 +9,8 @@ if "pipeline_logs" not in st.session_state:
     st.session_state.pipeline_logs = []
 
 # ---------------- SLA THRESHOLDS ----------------
-GREEN_LIMIT = 10     # minutes
-YELLOW_LIMIT = 30    # minutes
+GREEN_LIMIT = 1     # minutes
+YELLOW_LIMIT = 3   # minutes
 
 # ---------------- SIMULATE PIPELINE RUN ----------------
 with st.form("pipeline_form"):
