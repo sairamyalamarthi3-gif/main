@@ -1,69 +1,85 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 
-st.title("🕒 Data Pipeline Freshness Monitor")
+st.title("📊 Data Pipeline SLA Monitor")
 
-# ---------- SESSION STATE ----------
+# ---------------- SESSION STATE ----------------
 if "pipeline_logs" not in st.session_state:
     st.session_state.pipeline_logs = []
 
-# ---------- SIMULATE PIPELINE RUN ----------
+# ---------------- SLA THRESHOLDS ----------------
+GREEN_LIMIT = 10     # minutes
+YELLOW_LIMIT = 30    # minutes
+
+# ---------------- SIMULATE PIPELINE RUN ----------------
 with st.form("pipeline_form"):
-    st.subheader("⚙️ Simulate Pipeline Update")
+    st.subheader("⚙️ Simulate Pipeline Run")
 
     pipeline_name = st.selectbox(
-        "Pipeline",
+        "Pipeline Name",
         ["User Events ETL", "Sales Aggregation", "Feature Store Update"]
     )
 
-    run_pipeline = st.form_submit_button("Run Pipeline")
+    submit = st.form_submit_button("Run Pipeline")
 
-if run_pipeline:
+if submit:
     st.session_state.pipeline_logs.append({
         "Pipeline": pipeline_name,
         "Last Updated": datetime.now()
     })
-    st.success("Pipeline run logged")
+    st.success(f"{pipeline_name} updated")
 
-# ---------- DASHBOARD ----------
+# ---------------- DASHBOARD ----------------
 if st.session_state.pipeline_logs:
     df = pd.DataFrame(st.session_state.pipeline_logs)
 
-    # Keep latest update per pipeline
-    latest_df = df.sort_values("Last Updated").groupby(
+    # Keep only latest run per pipeline
+    df = df.sort_values("Last Updated").groupby(
         "Pipeline", as_index=False
     ).last()
 
     # Calculate freshness
     now = datetime.now()
-    latest_df["Minutes Since Update"] = (
-        now - latest_df["Last Updated"]
+    df["Minutes Since Update"] = (
+        now - df["Last Updated"]
     ).dt.total_seconds() / 60
 
-    st.subheader("📋 Pipeline Status")
-    st.dataframe(
-        latest_df.assign(
-            **{"Last Updated": latest_df["Last Updated"].dt.strftime("%Y-%m-%d %H:%M:%S")}
-        ),
-        use_container_width=True
-    )
+    # SLA Status logic
+    def sla_status(minutes):
+        if minutes <= GREEN_LIMIT:
+            return "🟢 Green"
+        elif minutes <= YELLOW_LIMIT:
+            return "🟡 Yellow"
+        else:
+            return "🔴 Red"
 
-    # ---------- FRESHNESS CHECK ----------
-    st.subheader("🚦 Freshness Check")
+    df["SLA Status"] = df["Minutes Since Update"].apply(sla_status)
 
-    FRESHNESS_THRESHOLD = 15  # minutes
+    # Format time
+    df["Last Updated"] = df["Last Updated"].dt.strftime("%Y-%m-%d %H:%M:%S")
+    df["Minutes Since Update"] = df["Minutes Since Update"].round(1)
 
-    stale = latest_df[latest_df["Minutes Since Update"] > FRESHNESS_THRESHOLD]
+    st.subheader("📋 Pipeline SLA Status")
+    st.dataframe(df, use_container_width=True)
 
-    st.metric("Total Pipelines", len(latest_df))
-    st.metric("Stale Pipelines", len(stale))
+    # ---------------- METRICS ----------------
+    green = (df["SLA Status"] == "🟢 Green").sum()
+    yellow = (df["SLA Status"] == "🟡 Yellow").sum()
+    red = (df["SLA Status"] == "🔴 Red").sum()
 
-    if not stale.empty:
-        st.error("⚠️ Some pipelines are stale")
-        st.dataframe(stale[["Pipeline", "Minutes Since Update"]])
+    col1, col2, col3 = st.columns(3)
+    col1.metric("🟢 Green", green)
+    col2.metric("🟡 Yellow", yellow)
+    col3.metric("🔴 Red", red)
+
+    # ---------------- ALERT ----------------
+    if red > 0:
+        st.error("🚨 Critical SLA breach detected!")
+    elif yellow > 0:
+        st.warning("⚠️ Some pipelines nearing SLA limits")
     else:
-        st.success("✅ All pipelines are fresh")
+        st.success("✅ All pipelines within SLA")
 
 else:
-    st.info("No pipeline runs recorded yet")
+    st.info("No pipeline runs yet. Simulate a pipeline run above.")
