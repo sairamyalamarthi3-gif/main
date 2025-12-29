@@ -9,7 +9,7 @@ st.title("🌐 Real-Time Website Traffic Monitoring")
 # Simulate visitor timestamps
 np.random.seed(42)
 timestamps = [datetime.now() - timedelta(minutes=i) for i in range(30)]
-counts = np.random.randint(5, 20, size=10)
+counts = np.random.randint(5, 20, size=30)
 
 df = pd.DataFrame({"timestamp": timestamps[::-1], "visits": counts})
 
