@@ -1,58 +1,44 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from datetime import datetime
 import altair as alt
-from datetime import datetime, timedelta
+import time
 
 st.title("🌐 Real-Time Website Traffic Monitoring")
 
-# ------------------------
-# Step 1: Simulate visitor counts
-# ------------------------
-np.random.seed(42)
-num_points = 30  # Number of data points
-counts = np.random.randint(5, 20, size=num_points)
+# Initialize session state
+if 'df' not in st.session_state:
+    st.session_state.df = pd.DataFrame(columns=['timestamp', 'visits', 'moving_avg', 'spike'])
 
-# ------------------------
-# Step 2: Generate timestamps matching the counts
-# ------------------------
-timestamps = [datetime.now() - timedelta(minutes=i) for i in range(num_points)]
+# Button to simulate new visitor data
+if st.button("Add New Visitor Count"):
+    new_count = np.random.randint(5, 20)
+    new_timestamp = datetime.now()
+    
+    # Append new row
+    new_row = pd.DataFrame({
+        'timestamp': [new_timestamp],
+        'visits': [new_count]
+    })
+    st.session_state.df = pd.concat([st.session_state.df, new_row], ignore_index=True)
+    
+    # Recalculate rolling average and spike detection
+    st.session_state.df['moving_avg'] = st.session_state.df['visits'].rolling(window=5, min_periods=1).mean()
+    st.session_state.df['spike'] = st.session_state.df['visits'] > st.session_state.df['moving_avg'] + 5
 
-# ------------------------
-# Step 3: Create dataframe
-# ------------------------
-df = pd.DataFrame({
-    "timestamp": timestamps[::-1],  # reverse to chronological order
-    "visits": counts
-})
-
-# ------------------------
-# Step 4: Compute rolling average
-# ------------------------
-df['moving_avg'] = df['visits'].rolling(window=5, min_periods=1).mean()
-
-# ------------------------
-# Step 5: Detect spikes
-# ------------------------
-threshold = 5
-df['spike'] = df['visits'] > df['moving_avg'] + threshold
-
-# ------------------------
-# Step 6: Display data
-# ------------------------
+# Display dataframe
 st.subheader("Traffic Data")
-st.dataframe(df)
+st.dataframe(st.session_state.df)
 
-# ------------------------
-# Step 7: Plot chart with spikes highlighted
-# ------------------------
-chart = alt.Chart(df).mark_line(point=True).encode(
+# Plot chart
+chart = alt.Chart(st.session_state.df).mark_line(point=True).encode(
     x='timestamp:T',
     y='visits:Q',
     color=alt.condition(
         alt.datum.spike == True,
-        alt.value('red'),    # spike points in red
-        alt.value('blue')    # normal points in blue
+        alt.value('red'),
+        alt.value('blue')
     ),
     tooltip=['timestamp', 'visits', 'moving_avg', 'spike']
 ).interactive()
