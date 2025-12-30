@@ -8,7 +8,7 @@ import time
 # CONFIG
 # -----------------------
 WARNING_TEMP = 70
-REFRESH_SECONDS = 5
+REFRESH_SECONDS = 60
 
 # -----------------------
 # SESSION STATE SETUP
