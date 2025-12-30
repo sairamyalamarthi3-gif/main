@@ -2,97 +2,140 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-st.title("📦 Order Queue Monitoring (Manual Input)")
+# =========================
+# MANUAL LOGIN CREDENTIALS
+# =========================
+USERS = {
+    "admin": "admin123",
+    "user1": "password1"
+}
 
-PENDING_THRESHOLD = 5
+# =========================
+# SESSION STATE SETUP
+# =========================
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-# ------------------------
-# SESSION STATE
-# ------------------------
 if "orders" not in st.session_state:
     st.session_state.orders = pd.DataFrame(
-        columns=["order_id", "timestamp", "status"]
+        columns=["user_id", "order_id", "timestamp", "status"]
     )
 
-# ------------------------
-# ADD NEW ORDER
-# ------------------------
-st.subheader("➕ Add New Order")
+# =========================
+# LOGIN PAGE
+# =========================
+def login_page():
+    st.title("🔐 Login")
 
-order_id = st.text_input("Order ID")
-status = st.selectbox("Order Status", ["Pending", "Processing"])
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
 
-if st.button("Add Order"):
-    if order_id.strip() == "":
-        st.error("Order ID cannot be empty")
+    if st.button("Login"):
+        if USERS.get(username) == password:
+            st.session_state.logged_in = True
+            st.success("Login successful ✅")
+            st.rerun()
+        else:
+            st.error("Invalid credentials ❌")
+
+# =========================
+# DASHBOARD
+# =========================
+def dashboard():
+    st.title("📦 Order Management Dashboard")
+
+    if st.button("Logout 🚪"):
+        st.session_state.logged_in = False
+        st.rerun()
+
+    st.divider()
+
+    # -------------------------
+    # ADD ORDER (USER INPUT)
+    # -------------------------
+    st.subheader("➕ Create New Order")
+
+    user_id = st.text_input("User ID")
+    order_id = st.text_input("Order ID")
+    status = st.selectbox("Order Status", ["Pending", "Processing"])
+
+    if st.button("Add Order"):
+        if user_id.strip() == "" or order_id.strip() == "":
+            st.error("User ID and Order ID are required")
+        else:
+            new_row = pd.DataFrame([{
+                "user_id": user_id,
+                "order_id": order_id,
+                "timestamp": datetime.now(),
+                "status": status
+            }])
+
+            st.session_state.orders = pd.concat(
+                [st.session_state.orders, new_row],
+                ignore_index=True
+            )
+
+            st.success("Order added successfully ✅")
+
+    # -------------------------
+    # UPDATE STATUS
+    # -------------------------
+    st.subheader("🔄 Update Order Status")
+
+    if not st.session_state.orders.empty:
+        selectable_orders = st.session_state.orders[
+            st.session_state.orders["status"] != "Completed"
+        ]
+
+        if not selectable_orders.empty:
+            selected = st.selectbox(
+                "Select Order",
+                selectable_orders["order_id"]
+            )
+
+            new_status = st.selectbox(
+                "New Status",
+                ["Pending", "Processing", "Completed"]
+            )
+
+            if st.button("Update Status"):
+                st.session_state.orders.loc[
+                    st.session_state.orders["order_id"] == selected,
+                    "status"
+                ] = new_status
+
+                st.success("Order status updated ✅")
+        else:
+            st.info("No active orders to update.")
     else:
-        new_order = {
-            "order_id": order_id,
-            "timestamp": datetime.now(),
-            "status": status
-        }
-        st.session_state.orders = pd.concat(
-            [st.session_state.orders, pd.DataFrame([new_order])],
-            ignore_index=True
-        )
-        st.success("Order added successfully!")
+        st.info("No orders available.")
 
-# ------------------------
-# UPDATE ORDER STATUS
-# ------------------------
-st.subheader("🔄 Update Order Status")
+    # -------------------------
+    # METRICS
+    # -------------------------
+    st.subheader("📊 Order Summary")
 
-if not st.session_state.orders.empty:
-    updatable_orders = st.session_state.orders[
-        st.session_state.orders["status"].isin(["Pending", "Processing"])
-    ]
+    counts = st.session_state.orders["status"].value_counts()
+    st.metric("🕒 Pending", counts.get("Pending", 0))
+    st.metric("⚙️ Processing", counts.get("Processing", 0))
+    st.metric("✅ Completed", counts.get("Completed", 0))
 
-    if not updatable_orders.empty:
-        selected_order = st.selectbox(
-            "Select Order to Mark as Completed",
-            updatable_orders["order_id"]
-        )
+    # -------------------------
+    # ALERT
+    # -------------------------
+    if counts.get("Pending", 0) > 5:
+        st.error("⚠️ Too many pending orders!")
 
-        if st.button("Mark as Completed ✅"):
-            st.session_state.orders.loc[
-                st.session_state.orders["order_id"] == selected_order,
-                "status"
-            ] = "Completed"
+    # -------------------------
+    # TABLE
+    # -------------------------
+    st.subheader("📋 Orders Table")
+    st.dataframe(st.session_state.orders, use_container_width=True)
 
-            st.success(f"Order {selected_order} marked as Completed!")
-    else:
-        st.info("No Pending or Processing orders available to update.")
+# =========================
+# APP FLOW
+# =========================
+if not st.session_state.logged_in:
+    login_page()
 else:
-    st.info("No orders available yet.")
-
-# ------------------------
-# DASHBOARD METRICS
-# ------------------------
-st.subheader("📊 Order Status Summary")
-
-status_counts = st.session_state.orders["status"].value_counts()
-
-pending = status_counts.get("Pending", 0)
-processing = status_counts.get("Processing", 0)
-completed = status_counts.get("Completed", 0)
-
-col1, col2, col3 = st.columns(3)
-col1.metric("🕒 Pending", pending)
-col2.metric("⚙️ Processing", processing)
-col3.metric("✅ Completed", completed)
-
-# ------------------------
-# ALERT
-# ------------------------
-st.subheader("🚨 Alerts")
-
-if pending > PENDING_THRESHOLD:
-    st.error("⚠️ High number of pending orders! Please take action.")
-else:
-    st.success("Order queue is under control ✅")
-
-# ------------------------
-# DATA TABLE
-# ------------------------
-st.subheader("📋 Order List")
-st.dataframe(st.session_state.orders)
+    dashboard()
