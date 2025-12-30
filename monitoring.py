@@ -4,9 +4,6 @@ from datetime import datetime
 
 st.title("📦 Order Queue Monitoring (Manual Input)")
 
-# ------------------------
-# CONFIG
-# ------------------------
 PENDING_THRESHOLD = 5
 
 # ------------------------
@@ -18,15 +15,12 @@ if "orders" not in st.session_state:
     )
 
 # ------------------------
-# MANUAL INPUT SECTION
+# ADD NEW ORDER
 # ------------------------
 st.subheader("➕ Add New Order")
 
 order_id = st.text_input("Order ID")
-status = st.selectbox(
-    "Order Status",
-    ["Pending", "Processing", "Completed"]
-)
+status = st.selectbox("Order Status", ["Pending", "Processing"])
 
 if st.button("Add Order"):
     if order_id.strip() == "":
@@ -37,13 +31,39 @@ if st.button("Add Order"):
             "timestamp": datetime.now(),
             "status": status
         }
-
         st.session_state.orders = pd.concat(
             [st.session_state.orders, pd.DataFrame([new_order])],
             ignore_index=True
         )
-
         st.success("Order added successfully!")
+
+# ------------------------
+# UPDATE ORDER STATUS
+# ------------------------
+st.subheader("🔄 Update Order Status")
+
+if not st.session_state.orders.empty:
+    updatable_orders = st.session_state.orders[
+        st.session_state.orders["status"].isin(["Pending", "Processing"])
+    ]
+
+    if not updatable_orders.empty:
+        selected_order = st.selectbox(
+            "Select Order to Mark as Completed",
+            updatable_orders["order_id"]
+        )
+
+        if st.button("Mark as Completed ✅"):
+            st.session_state.orders.loc[
+                st.session_state.orders["order_id"] == selected_order,
+                "status"
+            ] = "Completed"
+
+            st.success(f"Order {selected_order} marked as Completed!")
+    else:
+        st.info("No Pending or Processing orders available to update.")
+else:
+    st.info("No orders available yet.")
 
 # ------------------------
 # DASHBOARD METRICS
@@ -62,7 +82,7 @@ col2.metric("⚙️ Processing", processing)
 col3.metric("✅ Completed", completed)
 
 # ------------------------
-# ALERT LOGIC
+# ALERT
 # ------------------------
 st.subheader("🚨 Alerts")
 
