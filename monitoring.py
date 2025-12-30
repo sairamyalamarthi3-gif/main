@@ -1,16 +1,13 @@
 import streamlit as st
 import pandas as pd
-import random
 from datetime import datetime
-import time
 
-st.title("📦 Real-Time Order Queue Monitoring")
+st.title("📦 Order Queue Monitoring (Manual Input)")
 
 # ------------------------
 # CONFIG
 # ------------------------
 PENDING_THRESHOLD = 5
-REFRESH_SECONDS = 4
 
 # ------------------------
 # SESSION STATE
@@ -21,32 +18,43 @@ if "orders" not in st.session_state:
     )
 
 # ------------------------
-# SIMULATE NEW ORDER
+# MANUAL INPUT SECTION
 # ------------------------
-def generate_order():
-    return {
-        "order_id": random.randint(1000, 9999),
-        "timestamp": datetime.now(),
-        "status": random.choice(["Pending", "Processing", "Completed"])
-    }
+st.subheader("➕ Add New Order")
 
-# Add new order automatically
-new_order = generate_order()
-st.session_state.orders = pd.concat(
-    [st.session_state.orders, pd.DataFrame([new_order])],
-    ignore_index=True
+order_id = st.text_input("Order ID")
+status = st.selectbox(
+    "Order Status",
+    ["Pending", "Processing", "Completed"]
 )
+
+if st.button("Add Order"):
+    if order_id.strip() == "":
+        st.error("Order ID cannot be empty")
+    else:
+        new_order = {
+            "order_id": order_id,
+            "timestamp": datetime.now(),
+            "status": status
+        }
+
+        st.session_state.orders = pd.concat(
+            [st.session_state.orders, pd.DataFrame([new_order])],
+            ignore_index=True
+        )
+
+        st.success("Order added successfully!")
 
 # ------------------------
 # DASHBOARD METRICS
 # ------------------------
+st.subheader("📊 Order Status Summary")
+
 status_counts = st.session_state.orders["status"].value_counts()
 
 pending = status_counts.get("Pending", 0)
 processing = status_counts.get("Processing", 0)
 completed = status_counts.get("Completed", 0)
-
-st.subheader("📊 Current Order Status")
 
 col1, col2, col3 = st.columns(3)
 col1.metric("🕒 Pending", pending)
@@ -54,21 +62,17 @@ col2.metric("⚙️ Processing", processing)
 col3.metric("✅ Completed", completed)
 
 # ------------------------
-# WARNING
+# ALERT LOGIC
 # ------------------------
+st.subheader("🚨 Alerts")
+
 if pending > PENDING_THRESHOLD:
-    st.error("⚠️ Order backlog is high! Immediate action required.")
+    st.error("⚠️ High number of pending orders! Please take action.")
 else:
-    st.success("Order queue is healthy ✅")
+    st.success("Order queue is under control ✅")
 
 # ------------------------
 # DATA TABLE
 # ------------------------
-st.subheader("📋 Live Order Feed")
-st.dataframe(st.session_state.orders.tail(10))
-
-# ------------------------
-# AUTO REFRESH
-# ------------------------
-time.sleep(REFRESH_SECONDS)
-st.rerun()
+st.subheader("📋 Order List")
+st.dataframe(st.session_state.orders)
