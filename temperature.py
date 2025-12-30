@@ -45,7 +45,7 @@ if not st.session_state.logged_in:
 # DASHBOARD
 # -----------------------
 st.title("🌡️ Sensor Temperature Dashboard")
-st.caption("Auto-refreshes every 5 seconds")
+st.caption("Auto-refreshes every 60 seconds")
 
 # Logout
 if st.button("Logout"):
