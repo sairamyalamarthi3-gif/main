@@ -50,7 +50,7 @@ st.caption("Auto-refreshes every 5 seconds")
 # Logout
 if st.button("Logout"):
     st.session_state.logged_in = False
-    st.experimental_rerun()
+    st.rerun()
 
 # -----------------------
 # USER INPUT
@@ -123,4 +123,4 @@ if not st.session_state.sensor_data.empty:
 # AUTO REFRESH
 # -----------------------
 time.sleep(REFRESH_SECONDS)
-st.experimental_rerun()
+st.rerun()
