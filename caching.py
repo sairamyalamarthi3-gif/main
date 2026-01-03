@@ -8,6 +8,10 @@ def slow_square(x):
   time.sleep(2)
   return x*x
 
+if st.button("Clear Cache"):
+  st.cache_date.clear()
+  st.warning("Cache Cleared"!)
+  
 st.title("Cache Example")
 num = st.number_input("Enter a number",0,100)
 
