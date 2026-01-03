@@ -2,16 +2,17 @@ import streamlit as st
 import pandas as pd
 import time
 
-st.title("With Caching")
+st.title("Sales With Caching")
 
 @st.cache_data
-def load_data():
-  time.sleep(5)
-  return pd.DataFrame({
-    "item":["Apple","Banana","Orange"],
-    "price":["5","10","8"]
-  })
+def calculate_data_sales():
+  time.sleep(6)
+  return 12500
 
-st.write("Data Loading")
-data = load_data()
-st.dataframe(data)
+st.write("Click the button to calculate total sales")
+
+if st.button("Calculate Sales"):
+  sales = calculate_data_sales
+  st.success(f"Total sales today:£{sales}")
+  
+  
