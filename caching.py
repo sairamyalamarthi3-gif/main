@@ -3,10 +3,10 @@ import pandas as pd
 import numpy as np
 import time
 
-st.title("Streamlit Caching – Step 6 (Data Pipeline)")
+st.title("Streamlit Caching – Step 7 (Visualization Added)")
 
 # -----------------------------
-# 1. Cached Data Loader (NEW)
+# 1. Cached Data Loader
 # -----------------------------
 @st.cache_data
 def load_data(n_rows: int):
@@ -56,3 +56,9 @@ st.dataframe(df.head())
 
 st.subheader("Statistics")
 st.dataframe(stats)
+
+# -----------------------------
+# NEW: Visualization
+# -----------------------------
+st.subheader("Value Distribution (Histogram)")
+st.bar_chart(df["value"])
