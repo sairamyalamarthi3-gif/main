@@ -24,7 +24,7 @@ with st.spinner("Computing"):
   Squared = slow_square(num)
 
 with st.spinner("Computing........"):
-  Doubled = slow_double(number)
+  Doubled = slow_double(num)
 st.success("Done!")
 st.write("Sqaure",Squared)
 st.write("Double",Doubled)
