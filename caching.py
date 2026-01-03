@@ -9,7 +9,7 @@ def slow_square(x):
   return x*x
 
 if st.button("Clear Cache"):
-  st.cache_date.clear()
+  st.cache_data.clear()
   st.warning("Cache Cleared!")
   
 st.title("Cache Example")
