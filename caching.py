@@ -4,7 +4,7 @@ import time
 
 st.title("With Caching")
 
-@st.catche_data
+@st.cache_data
 def load_data():
   time.sleep(5)
   return pd.DataFrame({
