@@ -3,11 +3,13 @@ import time
 
 st.title("Streamlit Caching")
 
-def heavy_calculation(n):
-  time.sleep(5)
-  return n*n
+@st.cache_data
+def slow_square(x):
+  time.sleep(2)
+  return x*x
 
-number = st.number_input("Enter a number",value = 5)
-result = heavy_calculation(number)
+st.title("Cache Example")
+num = st.number_input("Enter a number",0,100)
+result = slow_square(num)
 st.write("Result",result)
   
