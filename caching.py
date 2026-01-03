@@ -8,6 +8,11 @@ def slow_square(x):
   time.sleep(2)
   return x*x
 
+@st.cache_data
+def slow_double(x,int):
+  time.sleep(2)
+  return x * 2
+
 if st.button("Clear Cache"):
   st.cache_data.clear()
   st.warning("Cache Cleared!")
@@ -16,7 +21,12 @@ st.title("Cache Example")
 num = st.number_input("Enter a number",0,100)
 
 with st.spinner("Computing"):
-  result = slow_square(num)
+  Squared = slow_square(num)
+
+with st.spinner("Computing........"):
+  Doubled = slow_double(number)
 st.success("Done!")
-st.write("Result",result)
+st.write("Sqaure",Squared)
+st.write("Double",Doubled)
+
   
