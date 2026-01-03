@@ -1,42 +1,58 @@
 import streamlit as st
+import pandas as pd
+import numpy as np
 import time
 
-st.title("Streamlit Caching – Step 5 (Resource Caching)")
+st.title("Streamlit Caching – Step 6 (Data Pipeline)")
 
 # -----------------------------
-# Cached Resource (NEW)
-# -----------------------------
-@st.cache_resource
-def get_fake_connection():
-    time.sleep(2)  # simulate slow setup
-    return "Connected to FakeDB"
-
-# -----------------------------
-# Cached Data Function
+# 1. Cached Data Loader (NEW)
 # -----------------------------
 @st.cache_data
-def slow_square(x: int):
-    time.sleep(3)
-    return x * x
+def load_data(n_rows: int):
+    time.sleep(2)  # simulate slow loading
+    df = pd.DataFrame({
+        "value": np.random.randn(n_rows),
+        "category": np.random.choice(["A", "B", "C"], n_rows)
+    })
+    return df
 
+# -----------------------------
+# 2. Cached Computation
+# -----------------------------
+@st.cache_data
+def compute_stats(df: pd.DataFrame):
+    time.sleep(3)  # simulate heavy computation
+    return df.groupby("category")["value"].agg(["mean", "std", "count"])
+
+# -----------------------------
 # Clear cache button
+# -----------------------------
 if st.button("Clear Cache"):
     st.cache_data.clear()
-    st.cache_resource.clear()
     st.warning("Cache cleared!")
 
+# -----------------------------
 # User input
-num = st.number_input("Enter a number", min_value=0, max_value=100, value=10)
+# -----------------------------
+rows = st.slider("Number of rows", 1000, 20000, 5000, step=1000)
 
-# Use the cached resource
-with st.spinner("Connecting to database..."):
-    conn = get_fake_connection()
+# -----------------------------
+# Run pipeline
+# -----------------------------
+with st.spinner("Loading data..."):
+    df = load_data(rows)
 
-# Use the cached data function
-with st.spinner("Computing square..."):
-    squared = slow_square(num)
+with st.spinner("Computing statistics..."):
+    stats = compute_stats(df)
 
 st.success("Done!")
 
-st.write("Database Status:", conn)
-st.write("Square:", squared)
+# -----------------------------
+# Display results
+# -----------------------------
+st.subheader("Sample Data")
+st.dataframe(df.head())
+
+st.subheader("Statistics")
+st.dataframe(stats)
