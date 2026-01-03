@@ -1,32 +1,42 @@
 import streamlit as st
 import time
 
-st.title("Streamlit Caching")
+st.title("Streamlit Caching – Step 5 (Resource Caching)")
 
+# -----------------------------
+# Cached Resource (NEW)
+# -----------------------------
+@st.cache_resource
+def get_fake_connection():
+    time.sleep(2)  # simulate slow setup
+    return "Connected to FakeDB"
+
+# -----------------------------
+# Cached Data Function
+# -----------------------------
 @st.cache_data
-def slow_square(x):
-  time.sleep(2)
-  return x*x
+def slow_square(x: int):
+    time.sleep(3)
+    return x * x
 
-@st.cache_data
-def slow_double(x:int):
-  time.sleep(2)
-  return x * 2
-
+# Clear cache button
 if st.button("Clear Cache"):
-  st.cache_data.clear()
-  st.warning("Cache Cleared!")
-  
-st.title("Cache Example")
-num = st.number_input("Enter a number",0,100)
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    st.warning("Cache cleared!")
 
-with st.spinner("Computing"):
-  Squared = slow_square(num)
+# User input
+num = st.number_input("Enter a number", min_value=0, max_value=100, value=10)
 
-with st.spinner("Computing........"):
-  Doubled = slow_double(num)
+# Use the cached resource
+with st.spinner("Connecting to database..."):
+    conn = get_fake_connection()
+
+# Use the cached data function
+with st.spinner("Computing square..."):
+    squared = slow_square(num)
+
 st.success("Done!")
-st.write("Sqaure",Squared)
-st.write("Double",Doubled)
 
-  
+st.write("Database Status:", conn)
+st.write("Square:", squared)
