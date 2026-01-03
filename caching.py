@@ -1,18 +1,13 @@
 import streamlit as st
-import pandas as pd
 import time
 
-st.title("Sales With Caching")
+st.title("Streamlit Caching")
 
-@st.cache_data
-def calculate_data_sales():
-  time.sleep(6)
-  return 12500
+def heavy_calculation(n):
+  time.sleep(5)
+  return n*n
 
-st.write("Click the button to calculate total sales")
-
-if st.button("Calculate Sales"):
-  sales = calculate_data_sales
-  st.success(f"Total sales today:£{sales}")
-  
+number = st.number_input("Enter a number",value = 5)
+result = heavy_calculation(number)
+st.write("Result",result)
   
