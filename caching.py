@@ -10,6 +10,9 @@ def slow_square(x):
 
 st.title("Cache Example")
 num = st.number_input("Enter a number",0,100)
-result = slow_square(num)
+
+with st.spinner(""Computing):
+  result = slow_square(num)
+st.success("Done!")
 st.write("Result",result)
   
