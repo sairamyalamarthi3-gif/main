@@ -9,7 +9,7 @@ def slow_square(x):
   return x*x
 
 @st.cache_data
-def slow_double(x,int):
+def slow_double(x:int):
   time.sleep(2)
   return x * 2
 
