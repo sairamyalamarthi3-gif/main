@@ -14,8 +14,8 @@ st.write("Upload a PDF, extract its text, and send it to your email.")
 # Email sending function
 # -----------------------------
 def send_email(receiver_email, extracted_text):
-    sender_email = "your_email@gmail.com"
-    sender_password = "your_app_password"  # Use App Password, not your real password
+    sender_email = "sairamyalamarthi3@gmail.com"
+    sender_password = "wlwi bqle aehc aanh"  # Use App Password, not your real password
 
     # Email content
     message = MIMEMultipart()
